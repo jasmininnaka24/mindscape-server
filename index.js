@@ -1418,7 +1418,7 @@ app.get('*', (req, res) => {
 });
 
 // Sync the Sequelize models with the database and start the server
-db.sequelize.sync().then(() => {
+db.sequelize.sync({ force: false, alter: false, logging: false, match: /_dev$/ }).then(() => {
   server.listen(3001, () => {
     console.log('Server is running on port 3001');
   });
