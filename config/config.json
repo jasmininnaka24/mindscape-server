@@ -1,11 +1,12 @@
 {
   "development": {
-    "username": "root",
-    "password": "123456789",
-    "database": "mindscapedb",
-    "host": "localhost",
+    "username": "u658399938_mindscapegrp3",
+    "password": "MindScapeDatabase@3",
+    "database": "u658399938_mindscapedb",
+    "host": "srv1091.hstgr.io",
     "dialect": "mysql"
   },
+
   "test": {
     "username": "root",
     "password": null,
