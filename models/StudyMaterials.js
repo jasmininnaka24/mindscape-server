@@ -75,7 +75,7 @@ module.exports = (sequelize, DataTypes) => {
     })
     StudyMaterials.hasMany(models.DashForPersonalAndGroup, {
       onDelete: 'cascade',
-    })   
+    }) 
 
     StudyMaterials.beforeDestroy(async (instance, options) => {
       if (instance.bookmarkedBy !== 0 || instance.materialFor === 'Group' || instance.tag === 'Shared') {
