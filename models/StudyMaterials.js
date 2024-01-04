@@ -77,7 +77,11 @@ module.exports = (sequelize) => {
     });
     StudyMaterials.hasMany(models.DashForPersonalAndGroup, {
       onDelete: 'cascade',
+<<<<<<< HEAD
     });
+=======
+    }) 
+>>>>>>> origin/main
 
     StudyMaterials.beforeDestroy(async (instance, options) => {
       if (instance.bookmarkedBy !== 0 || instance.materialFor === 'Group' || instance.tag === 'Shared') {
@@ -87,4 +91,8 @@ module.exports = (sequelize) => {
   };
 
   return StudyMaterials;
+<<<<<<< HEAD
 };
+=======
+}
+>>>>>>> origin/main
