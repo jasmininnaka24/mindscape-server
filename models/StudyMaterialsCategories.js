@@ -1,6 +1,6 @@
-// Assuming this is the file where your StudyMaterialsCategories model is defined
+const { DataTypes } = require('sequelize');
 
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize) => {
   const StudyMaterialsCategories = sequelize.define("StudyMaterialsCategories", {
     category: {
       type: DataTypes.STRING,
@@ -30,8 +30,8 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'cascade',
       },
     });
-    
-    // Update the following line to reference the StudyGroup model
+
+    // Assuming this is the corrected reference to the StudyGroup model
     StudyMaterialsCategories.belongsTo(models.StudyGroup, {
       foreignKey: {
         name: 'StudyGroupId',

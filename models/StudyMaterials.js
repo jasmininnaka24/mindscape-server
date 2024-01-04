@@ -1,4 +1,6 @@
-module.exports = (sequelize, DataTypes) => {
+const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
   const StudyMaterials = sequelize.define("StudyMaterials", {
     title: {
       type: DataTypes.STRING,
@@ -21,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     isStarted: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING, // Corrected data type
       allowNull: false,
       defaultValue: 'false',
     },
@@ -48,41 +50,41 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   StudyMaterials.associate = (models) => {
-
     StudyMaterials.belongsTo(models.User, {
       foreignKey: {
         name: 'UserId',
-        allowNull: true, // Allow null to remove the association
-        onDelete: 'cascade', // or 'SET DEFAULT'
+        allowNull: true,
+        onDelete: 'cascade',
       },
     });
+
     StudyMaterials.belongsTo(models.StudyGroup, {
       foreignKey: {
         name: 'StudyGroupId',
-        allowNull: true, // Allow null to remove the association
-        onDelete: 'cascade', // or 'SET DEFAULT'
+        allowNull: true,
+        onDelete: 'cascade',
       },
     });
 
     StudyMaterials.hasMany(models.QuesAns, {
       onDelete: 'cascade',
-    })
+    });
     StudyMaterials.hasMany(models.QuesAnsChoices, {
       onDelete: 'cascade',
-    })
+    });
     StudyMaterials.hasMany(models.QuesRev, {
       onDelete: 'cascade',
-    })
+    });
     StudyMaterials.hasMany(models.DashForPersonalAndGroup, {
       onDelete: 'cascade',
-    })   
+    });
 
     StudyMaterials.beforeDestroy(async (instance, options) => {
       if (instance.bookmarkedBy !== 0 || instance.materialFor === 'Group' || instance.tag === 'Shared') {
         options.cascade = false;
       }
     });
-  }
+  };
 
   return StudyMaterials;
-}
+};

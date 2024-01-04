@@ -1,4 +1,6 @@
-module.exports = (sequelize, DataTypes) => {
+const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
   const Token = sequelize.define("Token", {
     token: {
       type: DataTypes.STRING,
@@ -10,6 +12,8 @@ module.exports = (sequelize, DataTypes) => {
       expires: 3600,
     },
   });
+
+  // You can define associations or other configurations here if needed
 
   return Token;
 };

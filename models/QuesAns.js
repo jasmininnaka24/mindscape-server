@@ -1,4 +1,6 @@
-module.exports = (sequelize, DataTypes) => {
+const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
   const QuesAns = sequelize.define("QuesAns", {
     question: {
       type: DataTypes.TEXT,
@@ -32,8 +34,8 @@ module.exports = (sequelize, DataTypes) => {
   QuesAns.associate = (models) => {
     QuesAns.hasMany(models.QuesAnsChoices, {
       onDelete: 'cascade',
-    })
-  }
+    });
+  };
 
   return QuesAns;
-}
+};

@@ -1,4 +1,6 @@
-module.exports = (sequelize, DataTypes) => {
+const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
   const QuesRev = sequelize.define("QuesRev", {
     question: {
       type: DataTypes.TEXT,
@@ -10,6 +12,5 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
-
   return QuesRev;
-}
+};

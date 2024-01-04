@@ -7,6 +7,8 @@ const crypto = require('crypto');
 const bcrypt  = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
+const { Op } = require('sequelize');
+
 
 
 
@@ -20,7 +22,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // registration
 router.post('/', async (req, res) => {
-  const { username, password, email, name } = req.body;
+  const { username, password, email, name, url_host } = req.body;
   
   try {
 
@@ -90,10 +92,17 @@ router.post('/', async (req, res) => {
       token: crypto.randomBytes(32).toString('hex'),
     });
 
-    const url = `http://localhost:3000/users/${savedUserData.id}/verify/${token.token}`;
+    const url = `${url_host}/users/${savedUserData.id}/verify/${token.token}`;
     // Use the correct frontend URL, adjust the port if needed
-
-    await sendEmail(savedUserData.email, 'Verify Email', url);
+    
+    const verificationMessage = `
+    Kindly verify your account by clicking the link below:
+    
+    ${url}
+    `;
+    
+    await sendEmail(savedUserData.email, 'Verify Email', verificationMessage);
+    
 
     res.status(201).send({ message: "An email has been sent to your gmail account. Kindly check for verification." });
 
@@ -145,7 +154,7 @@ router.get('/:id/verify/:token', async (req, res) => {
 
 // log in
 router.post('/login', async (req, res) => {
-  const { password, email } = req.body;
+  const { password, email, url_host } = req.body;
 
   try {
 
@@ -174,7 +183,7 @@ router.post('/login', async (req, res) => {
           token: crypto.randomBytes(32).toString('hex'),
         });
 
-        const url = `${FRONTEND_URL}/users/${user.id}/verify/${token.token}`;
+        const url = `${url_host}/users/${user.id}/verify/${token.token}`;
         
         await sendEmail(user.email, 'Verify Email', url);
   
@@ -245,46 +254,48 @@ router.put('/update-user/:id', async (req, res) => {
   const { username, studyProfTarget, typeOfLearner } = req.body;
 
   try {
-
-    const usernameReponse = await User.findOne({
+    // Check if the provided username is already taken by another user
+    const existingUser = await User.findOne({
       where: {
         username: username,
+        id: {
+          [Op.not]: userId, // Exclude the current user from the search
+        },
       },
       attributes: {
-        exclude: ["password"]
-      }
+        exclude: ["password"],
+      },
     });
 
-
-
-    // User already exists
-    if (studyProfTarget == '' || username === '' || typeOfLearner === '') {
-      return res.json({ message: 'Fill out all the empty fields.', error: true });
-    } 
-
-    if (usernameReponse.username === username && usernameReponse.id !== parseInt(userId, 10)) {
+    if (existingUser) {
       return res.json({ message: 'Username is already taken.', error: true });
-    } 
+    }
 
-
-
+    // Validate other input fields
+    if (studyProfTarget === '' || username === '' || typeOfLearner === '') {
+      return res.json({ message: 'Fill out all the empty fields.', error: true });
+    }
 
     const UserData = await User.findByPk(userId);
 
     if (!UserData) {
-      return res.status(404).json({ error: 'Dashboard data not found' });
+      return res.json({ message: 'User not found', error: true });
     }
 
+    // Update user details
     UserData.username = username;
     UserData.studyProfTarget = studyProfTarget;
     UserData.typeOfLearner = typeOfLearner;
 
-    const updatedUserData = await UserData.save();
+    console.log('updated:', UserData);
 
-    res.json({message: 'User details has been updated.', error: false});
-    
+    // Save the updated user data
+    await UserData.save();
+
+    res.json({ message: 'User details have been updated.', error: false });
   } catch (error) {
-    res.json({message: 'Failed updating user details.', error: true});
+    console.error(error);
+    res.json({ message: 'Failed updating user details.', error: true });
   }
 });
 
@@ -335,7 +346,7 @@ router.put('/update-user-image/:id', async (req, res) => {
 
 
 router.post('/verify-email', async (req, res) => {
-  const {email} = req.body;
+  const { email, url_host} = req.body;
 
   try {
     const oldUser = await User.findOne({
@@ -352,12 +363,10 @@ router.post('/verify-email', async (req, res) => {
     const secret = jwtSecret + oldUser.password;
     const token =  sign({ email: oldUser.email, id: oldUser.id }, secret, {expiresIn: '5m'});
 
-    // const link = `http://localhost:3000/reset-password/${oldUser.id}/${token}`;
-    // console.log(link);
 
 
     // Construct the verification URL with the new token
-    const url = `http://localhost:3000/reset-password/${oldUser.id}/${token}`;
+    const url = `${url_host}/reset-password/${oldUser.id}/${token}`;
   
     // Use the correct frontend URL, adjust the port if needed
     await sendEmail(email, 'Verify Email', url);
@@ -379,7 +388,7 @@ router.get('/reset-password/:id/:token', async(req,res) => {
   const oldUser = await User.findByPk(id)
 
   if (!oldUser) {
-    return res.json({message: "User does not exist."})
+    return res.json({message: "User does not exist.", error: true})
   }
 
   const secret = jwtSecret + oldUser.password;
@@ -388,11 +397,11 @@ router.get('/reset-password/:id/:token', async(req,res) => {
   try {
 
     const verifyData = verify(token,secret);
-    res.json({email: verifyData.email});
+    res.json({message: "Your password has been updated.", error: false});
 
   } catch (error) {
     console.log(error);
-    res.json({message: "Not verified"});
+    res.json({message: "Your token has already expired.", error: true});
   }
 
 })

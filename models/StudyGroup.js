@@ -1,4 +1,6 @@
-module.exports = (sequelize, DataTypes) => {
+const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
   const StudyGroup = sequelize.define("StudyGroup", {
     groupName: {
       type: DataTypes.STRING,
@@ -18,22 +20,21 @@ module.exports = (sequelize, DataTypes) => {
     StudyGroup.belongsTo(models.User, {
       foreignKey: {
         name: 'UserId',
-        allowNull: true, // Allow null to remove the association
-        onDelete: 'SET NULL', // or 'SET DEFAULT'
+        allowNull: true,
+        onDelete: 'SET NULL',
       },
     });
-  
 
     StudyGroup.hasMany(models.StudyGroupMembers, {
       onDelete: 'cascade',
-    })
+    });
     StudyGroup.hasMany(models.DashForPersonalAndGroup, {
       onDelete: 'cascade',
-    })
+    });
     StudyGroup.hasMany(models.Tasks, {
       onDelete: 'cascade',
-    })
-  }
+    });
+  };
 
   return StudyGroup;
-}
+};

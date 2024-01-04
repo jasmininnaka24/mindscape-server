@@ -1,4 +1,6 @@
-module.exports = (sequelize, DataTypes) => {
+const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
   const Tasks = sequelize.define("Tasks", {
     task: {
       type: DataTypes.STRING,
@@ -18,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     completedTask: {
       type: DataTypes.STRING,
       allowNull: false,
-      default: 'Uncompleted',
+      defaultValue: 'Uncompleted', // Corrected default property
     },
     room: {
       type: DataTypes.STRING,
@@ -26,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   });
 
-  return Tasks;
-}
+  // You can define associations or other configurations here if needed
 
+  return Tasks;
+};

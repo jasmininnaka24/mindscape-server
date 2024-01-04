@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const sendEmail = require('../utils/sendEmail');
+
 const { StudyGroupMembers, StudyGroup } = require('../models')
 
 // creating a member to the group
@@ -8,6 +10,32 @@ router.post('/add-member', async (req, res) => {
   const savedGroupMemberDetails = await StudyGroupMembers.create(groupMemberDetails);
   res.json(savedGroupMemberDetails);
 })
+
+
+router.post('/invite-members', async (req, res) => {
+  const { email, groupName, title, sentence, url } = req.body;
+  
+  // Use the correct frontend URL, adjust the port if needed
+  
+  const verificationMessage = `You are invited to join ${sentence}.
+
+  Group name: ${groupName}
+  Study Material: ${title}
+
+  Kindly click the link below to be directed to the corresponding page: 
+  ${url}
+  `;
+
+  try {
+    await sendEmail(email, 'MindScape Study Session', verificationMessage);
+    console.log('sent to ' + email);
+
+    res.json({ error: false, message: 'Invitation sent successfully' });
+  } catch (error) {
+    console.error('Error sending invitation email:', error);
+    res.json({ error: true, message: 'Failed to send invitation email' });
+  }
+});
 
 
 
